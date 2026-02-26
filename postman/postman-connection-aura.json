@@ -2,8 +2,8 @@
   "info": {
     "_postman_id": "d8a2ff00-4cf2-457d-b10f-bde30140c1e2",
     "name": "Aura_API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "17435504"
+    "description": "Tested Postman collection for managing Neo4j Aura instances via the Aura REST API.\n\nBefore running any request, create a Postman environment with the following variables:\n  - aura_token     (auto-populated by Get_Token)\n  - instance_id    (auto-populated by Create_Instance, or set manually)\n\nStart by running Get_Token — it will store the Bearer token automatically for all subsequent requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -17,9 +17,7 @@
               "let myToken = responseData.access_token;",
               "pm.environment.set(\"aura_token\", myToken);"
             ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
+            "type": "text/javascript"
           }
         }
       ],
@@ -28,13 +26,13 @@
           "type": "basic",
           "basic": [
             {
-              "key": "password",
-              "value": "Your_Aura_API_Client_Secret",
+              "key": "username",
+              "value": "Your_Aura_API_Client_Id",
               "type": "string"
             },
             {
-              "key": "username",
-              "value": "Your_Aura_API_Client_ID",
+              "key": "password",
+              "value": "Your_Aura_API_Client_Secret",
               "type": "string"
             }
           ]
@@ -53,23 +51,15 @@
             {
               "key": "grant_type",
               "value": "client_credentials",
-              "type": "text",
-              "uuid": "1502d586-1380-4db2-b445-a41fd38753a1"
+              "type": "text"
             }
           ]
         },
         "url": {
           "raw": "https://api.neo4j.io/oauth/token",
           "protocol": "https",
-          "host": [
-            "api",
-            "neo4j",
-            "io"
-          ],
-          "path": [
-            "oauth",
-            "token"
-          ]
+          "host": ["api", "neo4j", "io"],
+          "path": ["oauth", "token"]
         }
       },
       "response": []
@@ -82,12 +72,10 @@
           "script": {
             "exec": [
               "let responseData = pm.response.json();",
-              "let myInstanceId = responseData.id;",
+              "let myInstanceId = responseData.data.id;",
               "pm.environment.set(\"instance_id\", myInstanceId);"
             ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
+            "type": "text/javascript"
           }
         }
       ],
@@ -112,7 +100,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"name\": \"neo4j-aura-bc-2\",\n    \"type\": \"business-critical\",\n    \"region\": \"us-east-1\",\n    \"cloud_provider\": \"aws\",\n    \"tenant_id\": \"abc-...-xyz\",\n    \"memory\": \"8G\",\n    \"storage\": \"16G\",\n    \"graph_analytics_plugin\": false,\n    \"vector_optimized\": false\n}",
+          "raw": "{\n    \"name\": \"your-instance-name\",\n    \"type\": \"business-critical\",\n    \"region\": \"us-east1\",\n    \"cloud_provider\": \"gcp\",\n    \"tenant_id\": \"your-tenant-id\",\n    \"memory\": \"8G\",\n    \"storage\": \"16G\",\n    \"graph_analytics_plugin\": false,\n    \"vector_optimized\": false\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -122,15 +110,8 @@
         "url": {
           "raw": "https://api.neo4j.io/v1/instances",
           "protocol": "https",
-          "host": [
-            "api",
-            "neo4j",
-            "io"
-          ],
-          "path": [
-            "v1",
-            "instances"
-          ]
+          "host": ["api", "neo4j", "io"],
+          "path": ["v1", "instances"]
         }
       },
       "response": []
@@ -141,12 +122,8 @@
         {
           "listen": "test",
           "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
+            "exec": [""],
+            "type": "text/javascript"
           }
         }
       ],
@@ -166,16 +143,96 @@
         "url": {
           "raw": "https://api.neo4j.io/v1/instances/{{instance_id}}",
           "protocol": "https",
-          "host": [
-            "api",
-            "neo4j",
-            "io"
-          ],
-          "path": [
-            "v1",
-            "instances",
-            "{{instance_id}}"
+          "host": ["api", "neo4j", "io"],
+          "path": ["v1", "instances", "{{instance_id}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Pause_Instance",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [""],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{aura_token}}",
+              "type": "string"
+            }
           ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://api.neo4j.io/v1/instances/{{instance_id}}/pause",
+          "protocol": "https",
+          "host": ["api", "neo4j", "io"],
+          "path": ["v1", "instances", "{{instance_id}}", "pause"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Resume_Instance",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [""],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{aura_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://api.neo4j.io/v1/instances/{{instance_id}}/resume",
+          "protocol": "https",
+          "host": ["api", "neo4j", "io"],
+          "path": ["v1", "instances", "{{instance_id}}", "resume"]
         }
       },
       "response": []
@@ -204,16 +261,8 @@
         "url": {
           "raw": "https://api.neo4j.io/v1/instances/{{instance_id}}",
           "protocol": "https",
-          "host": [
-            "api",
-            "neo4j",
-            "io"
-          ],
-          "path": [
-            "v1",
-            "instances",
-            "{{instance_id}}"
-          ]
+          "host": ["api", "neo4j", "io"],
+          "path": ["v1", "instances", "{{instance_id}}"]
         }
       },
       "response": []
