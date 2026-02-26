@@ -2,11 +2,11 @@
 
 ## Introduction
 
-The [Neo4j Aura API](https://neo4j.com/docs/aura/platform/api/specification/) gives customers a fully programmatic way to manage their Aura database instances. Using standard REST calls authenticated with OAuth 2.0, you can create instances, check their status, update configuration, pause, resume, and delete them — all without touching the Aura Console. The full API specification is available at [neo4j.com/docs/aura/platform/api/specification/](https://neo4j.com/docs/aura/platform/api/specification/).
+The [Neo4j Aura API](https://neo4j.com/docs/aura/platform/api/specification/) gives customers a fully programmatic way to manage their Aura database instances. Using standard REST calls authenticated with OAuth 2.0, you can create instances, check their status, update configuration, pause, resume, and delete them, all without touching the Aura Console. The full API specification is available at [neo4j.com/docs/aura/platform/api/specification/](https://neo4j.com/docs/aura/platform/api/specification/).
 
 This runbook demonstrates these capabilities through a practical migration scenario on AWS: reading a live instance configuration, exporting a snapshot, deleting the instance, and recreating it as a new Aura VDC instance using the API. Each step maps to a real API operation you can reuse independently in your own automation workflows.
 
-All API calls in this runbook have been tested and validated using Postman. A ready-to-use Postman collection is included in this repository under the `postman/` directory — import it directly to explore or run each operation without writing any shell commands.
+All API calls in this runbook have been tested and validated using Postman. A ready-to-use Postman collection is included in this repository under the `postman/` directory. Import it directly to explore or run each operation without writing any shell commands.
 
 ---
 
@@ -16,7 +16,7 @@ All API calls in this runbook have been tested and validated using Postman. A re
 |---|---|
 | Aura API credentials | Client ID and Client Secret from the Aura Console → Account → API Keys |
 | `curl` | Available in your shell |
-| `jq` | JSON processor — `brew install jq` / `apt install jq` |
+| `jq` | JSON processor (`brew install jq` / `apt install jq`) |
 | Neo4j `dump` utility or Aura Console access | For triggering the database dump |
 | AWS S3 bucket (optional) | Recommended for storing the dump file |
 | Sufficient IAM / Aura permissions | Instance Owner or Admin role on the Aura project |
@@ -105,7 +105,7 @@ export INST_PROJECT_ID=$(echo "$INSTANCE_CONFIG"  | jq -r '.data.tenant_id // .d
 
 ## Step 3: Export an Existing Snapshot from the Aura Console
 
-Aura automatically takes snapshots every hour, so a recent snapshot is already available — there is no need to trigger a new one.
+Aura automatically takes snapshots every hour, so a recent snapshot is already available. There is no need to trigger a new one.
 
 ### 3a: Identify and Download the Snapshot
 
@@ -119,7 +119,7 @@ Aura automatically takes snapshots every hour, so a recent snapshot is already a
 
 ### 3b: Move the Downloaded File into the Working Directory
 
-Set `DUMP_FILE` using the extension that matches your Neo4j version — `.dump` for v4, `.backup` for v5. Update the `mv` source filename to match what was downloaded.
+Set `DUMP_FILE` using the extension that matches your Neo4j version: `.dump` for v4, `.backup` for v5. Update the `mv` source filename to match what was downloaded.
 
 ```bash
 export DUMP_FILE="${WORK_DIR}/${INSTANCE_ID}.dump"
@@ -149,7 +149,7 @@ Write a human-readable summary alongside the raw JSON for audit/rollback purpose
 
 ```bash
 cat > "${WORK_DIR}/migration-summary.txt" <<EOF
-Neo4j Aura Migration — Pre-Deletion Summary
+Neo4j Aura Migration: Pre-Deletion Summary
 ============================================
 Date:              $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 Operator:          $(whoami)
@@ -236,7 +236,7 @@ while true; do
   fi
 
   CURRENT_STATUS=$(echo "$STATUS_CHECK" | grep -v "HTTP_STATUS" | jq -r '.data.status // "unknown"')
-  echo "  Status: ${CURRENT_STATUS} — still waiting..."
+  echo "  Status: ${CURRENT_STATUS} still waiting..."
   sleep 20
 done
 ```
@@ -249,7 +249,7 @@ Use the configuration values captured in Step 2 to create an identical new insta
 
 > **Note:** Aura VDC (Virtual Dedicated Cloud) instances require an active VDC contract on your project. Confirm this with your Neo4j account team before proceeding.
 
-Re-authenticate first — the token from Step 1 expires after 1 hour and the deletion polling in Step 5 may have consumed most of that window.
+Re-authenticate first. The token from Step 1 expires after 1 hour and the deletion polling in Step 5 may have consumed most of that window.
 
 ```bash
 TOKEN_RESPONSE=$(curl -sS \
@@ -316,7 +316,7 @@ cat >> "${WORK_DIR}/migration-summary.txt" <<EOF
 New Instance
 ------------
 New Instance ID:  ${NEW_INSTANCE_ID}
-Password saved:   $(date -u +"%Y-%m-%dT%H:%M:%SZ") — stored externally
+Password saved:   $(date -u +"%Y-%m-%dT%H:%M:%SZ") stored externally
 EOF
 ```
 
@@ -373,42 +373,78 @@ done
 
 ---
 
-## Step 8: Post-Migration Artifact Summary
+## Resize an Instance
+
+You can increase (or decrease) storage and memory on a running instance without pausing or taking it offline. The instance remains fully available during the resize operation.
+
+Storage can be changed independently of memory. If you change memory, the included storage allocation adjusts automatically, so check the resulting configuration after a memory resize.
+
+### Increase storage only
 
 ```bash
-echo ""
-echo "===== Migration Complete ====="
-echo "Work directory: ${WORK_DIR}"
-ls -lh "${WORK_DIR}/"
-echo ""
-echo "Files to retain:"
-echo "  instance-config.json    — original instance configuration"
-echo "  new-instance-config.json — new instance configuration"
-echo "  migration-summary.txt   — human-readable audit record"
-echo "  ${INSTANCE_ID}.dump     — database dump file"
-echo "  create-response.json    — API response (contains connection URI)"
-echo ""
-echo "Next step: Restore the dump into instance ${NEW_INSTANCE_ID} per your restore runbook."
+curl -sS \
+  -X PATCH "https://api.neo4j.io/v1/instances/${INSTANCE_ID}" \
+  -H "Authorization: Bearer ${AURA_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"storage": "32G"}'
 ```
+
+### Increase memory only
+
+```bash
+curl -sS \
+  -X PATCH "https://api.neo4j.io/v1/instances/${INSTANCE_ID}" \
+  -H "Authorization: Bearer ${AURA_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"memory": "16G"}'
+```
+
+### Increase both together
+
+```bash
+curl -sS \
+  -X PATCH "https://api.neo4j.io/v1/instances/${INSTANCE_ID}" \
+  -H "Authorization: Bearer ${AURA_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"memory": "16G", "storage": "32G"}'
+```
+
+After the PATCH call, poll `GET /v1/instances/${INSTANCE_ID}` and wait for the status to return `running` before treating the resize as complete.
+
+> **Note:** Downsizing memory is allowed, but only if the new value is equal to or greater than current memory usage. Attempting to downsize below current usage will return an error.
 
 ---
 
-## Aura API Field Reference
+## Pause and Resume an Instance
 
-The table below maps common Aura API response fields to their meaning, for use when interpreting `instance-config.json`.
+Pausing an instance temporarily stops the database without deleting it. Data is preserved and the instance can be resumed at any time. While paused, you are charged at 20% of the normal running cost. Aura will automatically resume an instance after 30 days to apply updates.
 
-| API Field | Description | Example Value |
-|---|---|---|
-| `id` | Unique instance identifier | `3b8a6f1c` |
-| `name` | Human-readable instance name | `prod-graph-db` |
-| `status` | Current instance state | `running` |
-| `type` | Instance tier | `enterprise-db` |
-| `cloud_provider` | Hosting cloud | `aws` |
-| `region` | AWS region | `us-east-1` |
-| `memory` | RAM allocation in GB | `32` |
-| `storage` | Disk allocation in GB | `64` |
-| `tenant_id` / `project_id` | Aura project the instance belongs to | `abc123` |
-| `connection_url` | Bolt endpoint for the instance | `neo4j+s://...databases.neo4j.io` |
+This makes pause/resume a useful tool for dev, test, or demo instances that do not need to run continuously.
+
+### Pause
+
+```bash
+curl -sS \
+  -X POST "https://api.neo4j.io/v1/instances/${INSTANCE_ID}/pause" \
+  -H "Authorization: Bearer ${AURA_TOKEN}" \
+  -H "Accept: application/json"
+```
+
+### Resume
+
+```bash
+curl -sS \
+  -X POST "https://api.neo4j.io/v1/instances/${INSTANCE_ID}/resume" \
+  -H "Authorization: Bearer ${AURA_TOKEN}" \
+  -H "Accept: application/json"
+```
+
+After calling either endpoint, poll `GET /v1/instances/${INSTANCE_ID}` and wait for the status to return `paused` or `running` respectively.
+
+> **Scheduled pause/resume:** You can automate pause and resume on a schedule using a cron job, GitHub Actions workflow, or any scheduler that can run a curl command. For example, pausing every evening at 20:00 UTC and resuming every morning at 07:00 UTC on weekdays keeps your instance available during working hours while minimising cost outside of them. A GitHub Actions example is available at [neo4j.com/blog/developer/automate-start-stop-auradb-instances/](https://neo4j.com/blog/developer/automate-start-stop-auradb-instances/).
 
 ---
 
@@ -425,24 +461,32 @@ The table below maps common Aura API response fields to their meaning, for use w
 
 ---
 
----
-
 ## Other Ways to Manage Aura Instances
 
 The shell-based approach in this runbook is one of several ways to interact with the Aura API.
 
 **Postman** is a great option for exploring and testing the API interactively. A Postman collection covering all the operations in this runbook is included in the `postman/` directory of this repository. Import it, set your `client_id` and `client_secret` as collection variables, and you can run each request individually without writing any code.
 
-**AI chat agents** are an increasingly practical option for one-off tasks. Any agent connected to the Aura API can accept plain natural language instructions and translate them into the correct API calls automatically. For example:
+**AI chat agents** are an increasingly practical option for managing Aura instances using plain natural language. Tools like [Kiro](https://kiro.dev) connected to the Neo4j Aura MCP server expose all key API operations as callable tools, with no shell commands or scripts required.
 
-> "Hey `Agent`, can you please create a business critical instance with name `neo4j-aura-bc-2` in the `us-east1` region on GCP with `tenant_id: abc-....-xyz`, `16G` storage, `8G` memory, and with `vector_optimized` and `graph_analytics_plugin` enabled."
+The Neo4j Aura MCP server provides 12 tools out of the box, including `list_instances`, `get_instance_details`, `create_instance`, `pause_instance`, `resume_instance`, `delete_instance`, `list_tenants`, and more:
 
-Tools like Claude, Kiro, Gemini Pro, etc with an Aura MCP connector can handle the full request — including polling for the instance to become available and returning the connection details — without any manual scripting. The API is the same underneath regardless of how you call it.
+![Neo4j Aura MCP connected in Kiro with 12 tools](images/neo4j-aura-mcp-tools.png)
 
+You can then interact with your instances using natural language. For example, asking Kiro to check the memory of a specific instance returns an instant answer:
+
+![Kiro answering a natural language query about instance memory](images/kiro-natural-language-query.png)
+
+Or for more complex operations, simply describe what you need:
+
+> "Hey, can you please create a business critical instance with name `neo4j-aura-bc-2` in the `us-east1` region on GCP with `tenant_id: abc-....-xyz`, `16G` storage, `8G` memory, and with `vector_optimized` and `graph_analytics_plugin` enabled."
+
+The agent handles the API call, polls for the instance to become available, and returns the connection details. The underlying Aura API is the same regardless of how you call it.
+
+---
 
 ## Conclusion
 
-This runbook walked through a full instance migration using the Aura REST API, from capturing configuration and exporting a snapshot through to deletion and recreation as an Aura VDC instance. The same individual API operations — creating an instance, reading its status, deleting it — can be lifted from this runbook and used independently in your own pipelines and automation.
+This runbook walked through a full instance migration using the Aura REST API, from capturing configuration and exporting a snapshot through to deletion and recreation as an Aura VDC instance. The same individual API operations (creating an instance, reading its status, deleting it) can be lifted from this runbook and used independently in your own pipelines and automation.
 
-
-*Runbook version: 1.1 — AWS / Aura VDC*
+*Runbook version: 1.1 | AWS / Aura VDC*
