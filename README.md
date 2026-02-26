@@ -30,7 +30,7 @@ Set these at the start of your session. All subsequent commands reference them.
 ```bash
 export AURA_CLIENT_ID="Your_Aura_API_Client_Id"
 export AURA_CLIENT_SECRET="Your_Aura_API_Client_Secret"
-export INSTANCE_ID="<existing-aura-instance-id>"
+export INSTANCE_ID="Your_existing_aura_instance-id"
 export WORK_DIR="./aura-migration-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$WORK_DIR"
 ```
