@@ -479,7 +479,7 @@ You can then interact with your instances using natural language. For example, a
 
 Or for more complex operations, simply describe what you need:
 
-> "Hey, can you please create a business critical instance with name `neo4j-aura-bc-2` in the `us-east1` region on GCP with `tenant_id: abc-....-xyz`, `16G` storage, `8G` memory, and with `vector_optimized` and `graph_analytics_plugin` enabled."
+> "Hey Kiro, can you please create a business critical instance with name `neo4j-aura-bc-2` in the `us-east1` region on GCP with `tenant_id: abc-....-xyz`, `16G` storage, `8G` memory, and with `vector_optimized` and `graph_analytics_plugin` enabled."
 
 The agent handles the API call, polls for the instance to become available, and returns the connection details. The underlying Aura API is the same regardless of how you call it.
 
