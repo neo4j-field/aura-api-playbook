@@ -420,7 +420,7 @@ After the PATCH call, poll `GET /v1/instances/${INSTANCE_ID}` and wait for the s
 
 ## Pause and Resume an Instance
 
-Pausing an instance temporarily stops the database without deleting it. Data is preserved and the instance can be resumed at any time. While paused, you are charged at 20% of the normal running cost. Aura will automatically resume an instance after 30 days to apply updates.
+Pausing an instance temporarily stops the database without deleting it. Data is preserved and the instance can be resumed at any time. Aura will automatically resume an instance after 30 days to apply updates.
 
 This makes pause/resume a useful tool for dev, test, or demo instances that do not need to run continuously.
 
