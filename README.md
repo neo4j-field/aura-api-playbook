@@ -243,7 +243,7 @@ done
 
 ---
 
-## Step 6: Recreate the Instance as an Aura VDC on AWS
+## Step 6: Recreate the Instance
 
 Use the configuration values captured in Step 2 to create an identical new instance.
 
