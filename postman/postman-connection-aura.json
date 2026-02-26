@@ -1,0 +1,222 @@
+{
+  "info": {
+    "_postman_id": "d8a2ff00-4cf2-457d-b10f-bde30140c1e2",
+    "name": "Aura_API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "17435504"
+  },
+  "item": [
+    {
+      "name": "Get_Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let responseData = pm.response.json();",
+              "let myToken = responseData.access_token;",
+              "pm.environment.set(\"aura_token\", myToken);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "Your_Aura_API_Client_Secret",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "Your_Aura_API_Client_ID",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text",
+              "uuid": "1502d586-1380-4db2-b445-a41fd38753a1"
+            }
+          ]
+        },
+        "url": {
+          "raw": "https://api.neo4j.io/oauth/token",
+          "protocol": "https",
+          "host": [
+            "api",
+            "neo4j",
+            "io"
+          ],
+          "path": [
+            "oauth",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create_Instance",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let responseData = pm.response.json();",
+              "let myInstanceId = responseData.id;",
+              "pm.environment.set(\"instance_id\", myInstanceId);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{aura_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"neo4j-aura-bc-2\",\n    \"type\": \"business-critical\",\n    \"region\": \"us-east1\",\n    \"cloud_provider\": \"gcp\",\n    \"tenant_id\": \"ac7d1091-e574-5b61-842c-1fa087ca4a48\",\n    \"memory\": \"8G\",\n    \"storage\": \"16G\",\n    \"graph_analytics_plugin\": false,\n    \"vector_optimized\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.neo4j.io/v1/instances",
+          "protocol": "https",
+          "host": [
+            "api",
+            "neo4j",
+            "io"
+          ],
+          "path": [
+            "v1",
+            "instances"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get_Instance_State",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{aura_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.neo4j.io/v1/instances/{{instance_id}}",
+          "protocol": "https",
+          "host": [
+            "api",
+            "neo4j",
+            "io"
+          ],
+          "path": [
+            "v1",
+            "instances",
+            "{{instance_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete_Instance",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{aura_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://api.neo4j.io/v1/instances/{{instance_id}}",
+          "protocol": "https",
+          "host": [
+            "api",
+            "neo4j",
+            "io"
+          ],
+          "path": [
+            "v1",
+            "instances",
+            "{{instance_id}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
