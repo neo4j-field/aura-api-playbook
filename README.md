@@ -471,11 +471,11 @@ The shell-based approach in this runbook is one of several ways to interact with
 
 The Neo4j Aura MCP server provides 12 tools out of the box, including `list_instances`, `get_instance_details`, `create_instance`, `pause_instance`, `resume_instance`, `delete_instance`, `list_tenants`, and more:
 
-![Neo4j Aura MCP connected in Kiro with 12 tools](images/neo4j-aura-mcp-tools.png)
+<img src="images/neo4j-aura-mcp-tools.png" alt="Neo4j Aura MCP connected in Kiro with 12 tools" width="45%">
 
 You can then interact with your instances using natural language. For example, asking Kiro to check the memory of a specific instance returns an instant answer:
 
-![Kiro answering a natural language query about instance memory](images/kiro-natural-language-query.png)
+<img src="images/kiro-natural-language-query.png" alt="Kiro answering a natural language query about instance memory" width="45%">
 
 Or for more complex operations, simply describe what you need:
 
