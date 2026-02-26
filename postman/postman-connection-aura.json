@@ -112,7 +112,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"name\": \"neo4j-aura-bc-2\",\n    \"type\": \"business-critical\",\n    \"region\": \"us-east1\",\n    \"cloud_provider\": \"gcp\",\n    \"tenant_id\": \"abc-...-xyz\",\n    \"memory\": \"8G\",\n    \"storage\": \"16G\",\n    \"graph_analytics_plugin\": false,\n    \"vector_optimized\": false\n}",
+          "raw": "{\n    \"name\": \"neo4j-aura-bc-2\",\n    \"type\": \"business-critical\",\n    \"region\": \"us-east-1\",\n    \"cloud_provider\": \"aws\",\n    \"tenant_id\": \"abc-...-xyz\",\n    \"memory\": \"8G\",\n    \"storage\": \"16G\",\n    \"graph_analytics_plugin\": false,\n    \"vector_optimized\": false\n}",
           "options": {
             "raw": {
               "language": "json"
