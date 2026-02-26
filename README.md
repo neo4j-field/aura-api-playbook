@@ -467,6 +467,8 @@ The shell-based approach in this runbook is one of several ways to interact with
 
 **Postman** is a great option for exploring and testing the API interactively. A Postman collection covering all the operations in this runbook is included in the `postman/` directory of this repository. Import it, set your `client_id` and `client_secret` as collection variables, and you can run each request individually without writing any code.
 
+![Aura API Postman collection showing all requests](images/postman-aura-api-collection.png)
+
 **AI chat agents** are an increasingly practical option for managing Aura instances using plain natural language. Tools like [Kiro](https://kiro.dev) connected to the Neo4j Aura MCP server expose all key API operations as callable tools, with no shell commands or scripts required.
 
 The Neo4j Aura MCP server provides 12 tools out of the box, including `list_instances`, `get_instance_details`, `create_instance`, `pause_instance`, `resume_instance`, `delete_instance`, `list_tenants`, and more:
